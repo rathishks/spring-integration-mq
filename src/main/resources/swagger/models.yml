@@ -1,0 +1,39 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+definitions:
+  InputObject:
+    type: object
+    properties:
+      account_number:
+        type: string
+        x-offset: 1
+        x-length: 10
+      payment_date:
+        type: string
+        x-offset: 11
+        x-length: 8
+        x-padding-char: 0
+      payment_amount:
+        type: string
+        x-offset: 19
+        x-length: 10
+        x-padding-char: 0
+
+  OutputObject:
+    type: object
+    properties:
+      account_number:
+        type: string
+        x-offset: 1
+        x-length: 12
+      payment_date:
+        type: string
+        x-offset: 13
+        x-length: 8
+        x-padding-char: 0
+      payment_amount:
+        type: string
+        x-offset: 21
+        x-length: 20
+        x-padding-char: 0

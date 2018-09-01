@@ -1,0 +1,20 @@
+package {{package}};
+
+import java.util.Objects;
+import com.ancientprogramming.fixedformat4j.annotation.Align;
+import com.ancientprogramming.fixedformat4j.annotation.Field;
+import com.ancientprogramming.fixedformat4j.annotation.Record;
+{{#serializableModel}}
+import java.io.Serializable;
+{{/serializableModel}}
+
+{{#models}}
+{{#model}}
+{{#isEnum}}
+{{>enumOuterClass}}
+{{/isEnum}}
+{{^isEnum}}
+{{>pojo}}
+{{/isEnum}}
+{{/model}}
+{{/models}}

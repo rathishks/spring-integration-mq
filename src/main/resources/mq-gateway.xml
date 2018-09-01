@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/integration"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:jms="http://www.springframework.org/schema/integration/jms"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/integration
+        http://www.springframework.org/schema/integration/spring-integration.xsd
+        http://www.springframework.org/schema/integration/jms
+        http://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd">
+
+    <context:component-scan base-package="com.rathish.spring.integration"/>
+    <context:property-placeholder location="application.properties"/>
+
+    <beans:bean primary="true" id="jmsConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+        <beans:property name="targetConnectionFactory">
+            <beans:ref bean="jmsQueueConnectionFactory"/>
+        </beans:property>
+        <beans:property name="sessionCacheSize" value="10"/>
+        <beans:property name="cacheConsumers" value="false"/>
+    </beans:bean>
+
+    <beans:bean id="jmsQueueConnectionFactory" class="org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapter">
+        <beans:property name="targetConnectionFactory" ref="mqQueueConnectionFactory"/>
+        <beans:property name="username" value="${mq.credentials.username}"/>
+        <beans:property name="password" value="${mq.credentials.password}"/>
+    </beans:bean>
+
+
+    <beans:bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <beans:property name="connectionFactory" ref="jmsQueueConnectionFactory"/>
+    </beans:bean>
+
+    <!-- Queues -->
+    <beans:bean id="inboundQueue" class="com.ibm.mq.jms.MQQueue">
+        <beans:constructor-arg name="queueManagerName" value="${mq.queue.manager}"/>
+        <beans:constructor-arg name="queueName" value="${mq.queue.inbound}"/>
+    </beans:bean>
+
+    <beans:bean id="outboundQueue" class="com.ibm.mq.jms.MQQueue">
+        <beans:constructor-arg name="queueManagerName" value="${mq.queue.manager}"/>
+        <beans:constructor-arg name="queueName" value="${mq.queue.outbound}"/>
+    </beans:bean>
+
+    <!-- Inbound Gateway -->
+    <jms:inbound-gateway id="inboundGateway"
+                         request-channel="inputChannel"
+                         connection-factory="jmsQueueConnectionFactory"
+                         request-destination="inboundQueue"/>
+
+    <!-- Outbound Adaptors -->
+    <jms:outbound-channel-adapter id="outboundChannelAdaptor" channel="outputChannel" destination="outboundQueue"/>
+
+    <!-- Direct Channels -->
+    <channel id="inputChannel"/>
+    <channel id="outputChannel"/>
+    <channel id="transformerChannel"/>
+
+</beans:beans>

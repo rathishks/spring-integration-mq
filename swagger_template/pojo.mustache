@@ -1,0 +1,62 @@
+/**
+* {{#description}}{{.}}{{/description}}{{^description}}{{classname}}{{/description}}
+*/
+{{#description}}{{/description}}
+{{>generatedAnnotation}}{{#discriminator}}{{>typeInfoAnnotation}}{{/discriminator}}{{>xmlAnnotation}}
+@Record
+public class {{classname}} {
+
+{{#vars}}
+    {{^isContainer}}
+    private {{{datatypeWithEnum}}} {{name}} = {{{defaultValue}}};
+    {{/isContainer}}
+{{/vars}}
+{{#vars}}
+
+    @Field({{#vendorExtensions.x-offset}}offset = {{{vendorExtensions.x-offset}}}{{/vendorExtensions.x-offset}}{{#vendorExtensions.x-length}}, length = {{{vendorExtensions.x-length}}}{{/vendorExtensions.x-length}}{{#vendorExtensions.x-padding-char}}, align = Align.RIGHT, paddingChar = '{{{vendorExtensions.x-padding-char}}}'{{/vendorExtensions.x-padding-char}})
+    public {{{datatypeWithEnum}}} {{#isBoolean}}is{{/isBoolean}}{{getter}}() {
+        return {{name}};
+    }
+
+    public void {{setter}}({{{datatypeWithEnum}}} {{name}}) {
+        this.{{name}} = {{name}};
+    }
+{{/vars}}
+
+    @Override
+    public boolean equals(java.lang.Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }{{#hasVars}}
+        {{classname}} {{classVarName}} = ({{classname}}) o;
+        return {{#vars}}Objects.equals(this.{{name}}, {{classVarName}}.{{name}}){{#hasMore}} &&
+        {{/hasMore}}{{/vars}}{{#parent}} &&
+        super.equals(o){{/parent}};{{/hasVars}}{{^hasVars}}
+        return true;{{/hasVars}}
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash({{#vars}}{{name}}{{#hasMore}}, {{/hasMore}}{{/vars}}{{#parent}}{{#hasVars}}, {{/hasVars}}super.hashCode(){{/parent}});
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class {{classname}} {\n");
+        {{#parent}}sb.append("    ").append(toIndentedString(super.toString())).append("\n");{{/parent}}
+        {{#vars}}sb.append("    {{name}}: ").append(toIndentedString({{name}})).append("\n");
+        {{/vars}}sb.append("}");
+        return sb.toString();
+    }
+
+    private String toIndentedString(java.lang.Object o) {
+        if (o == null) {
+        return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
+}

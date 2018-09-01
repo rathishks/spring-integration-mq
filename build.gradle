@@ -3,10 +3,14 @@ buildscript {
         springBootVersion = '2.0.4.RELEASE'
     }
     repositories {
+        maven { // added for swagger-generator
+            url "https://plugins.gradle.org/m2/"
+        }
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0"
     }
 }
 
@@ -14,6 +18,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'org.hidetake.swagger.generator'
 
 group = 'com.rathish.spring'
 version = '0.0.1-SNAPSHOT'
@@ -23,23 +28,32 @@ repositories {
     mavenCentral()
 }
 
-
-ext {
-    springCloudVersion = 'Finchley.SR1'
-}
+defaultTasks 'clean', 'build'
 
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-actuator')
-    compile('org.springframework.boot:spring-boot-starter-integration')
-    compile('org.springframework.boot:spring-boot-starter-mustache')
-    compile('org.springframework.cloud:spring-cloud-starter-sleuth')
-    runtime('org.springframework.boot:spring-boot-devtools')
-    compileOnly('org.projectlombok:lombok')
-    testCompile('org.springframework.boot:spring-boot-starter-test')
+    compile 'org.springframework.boot:spring-boot-starter-integration'
+    compile 'org.springframework.integration:spring-integration-jms'
+    compile 'com.ibm.mq:mq-jms-spring-boot-starter:2.0.0'
+    runtime 'org.springframework.boot:spring-boot-devtools'
+
+    swaggerCodegen 'io.swagger:swagger-codegen-cli:2.3.1'
+    compile 'com.ancientprogramming.fixedformat4j:fixedformat4j:1.2.2'
+
+    compileOnly 'org.projectlombok:lombok'
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+swaggerSources{
+    model{
+        inputFile = file('src/main/resources/swagger/models.yml')
+        code{
+            language = 'spring'
+            configFile = file('src/main/resources/swagger/swagger_config.json')
+            templateDir = file('swagger_template')
+            components = ['models']
+        }
     }
 }
+
+sourceSets.main.java.srcDirs swaggerSources.model.code.outputDir
+compileJava.dependsOn swaggerSources.model.code

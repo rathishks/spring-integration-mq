@@ -1,0 +1,9 @@
+{
+  "library": "spring-boot",
+  "dateLibrary": "java8",
+  "modelPackage": "com.rathish.spring.integration.model",
+  "invokerPackage": "com.rathish.spring.integration",
+  "sourceFolder": "",
+  "useTags": "true",
+  "delegatePattern": "true"
+}
